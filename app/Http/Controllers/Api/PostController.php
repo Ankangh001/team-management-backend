@@ -68,4 +68,11 @@ class PostController extends Controller
         return response()->json(['message' => 'Post deleted']);
     }
 
+    public function like($id)
+    {
+        $post = Post::findOrFail($id);
+        $post->increment('likes');
+        return response()->json(['success' => true]);
+    }
+
 }
