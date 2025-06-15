@@ -24,6 +24,7 @@ Route::put('/posts/{id}', [PostController::class, 'update']);
 Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 Route::post('/posts/{id}/like', [PostController::class, 'like']);
 Route::post('/posts/{id}/comments', [CommentController::class, 'store']);
+Route::put('/posts/{id}/toggle-pin', [PostController::class, 'togglePin']);
 
 Route::middleware('auth:sanctum')->group(function () {
 });

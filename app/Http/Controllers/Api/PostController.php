@@ -10,7 +10,10 @@ class PostController extends Controller
 {
     public function index()
     {
-        return Post::latest()->get();
+        return Post::select('id', 'title', 'content', 'post_type', 'is_pinned', 'author', 'created_at')
+        ->orderByDesc('is_pinned')
+        ->orderByDesc('created_at')
+        ->get();
     }
 
     public function store(Request $request)
