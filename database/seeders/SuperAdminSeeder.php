@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
+
+class SuperAdminSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run()
+    {
+        Role::firstOrCreate(['name' => 'super_admin']);
+
+        $user = User::firstOrCreate(
+            ['email' => 'ankan@example.com'],
+            [
+                'name' => 'Ankan Ghosh',
+                'password' => Hash::make('admin123456789')
+            ]
+        );
+
+        $user->assignRole('super_admin');
+    }
+}
