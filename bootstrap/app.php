@@ -13,8 +13,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->prependToGroup('web', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
-        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
+        $middleware->api(prepend:[
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class
+        ]);
+
+        $middleware->alias([
+            'verified' => \Laravel\Sanctum\Http\Middleware\EnsureEmailIsVerified::class
+        ]);
+
+        $middleware->validateCsrfTokens(except:[
+            'api/*'
+        ]);
+
+
+        // $middleware->prependToGroup('web', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
+        // $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
