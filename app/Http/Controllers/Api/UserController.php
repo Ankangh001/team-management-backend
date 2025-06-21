@@ -41,4 +41,38 @@ class UserController extends Controller
         return response()->json($users);
     }
 
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'bio' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $user->name = $request->name;
+        $user->bio = $request->bio;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('uploads/profile', 'public');
+            $user->image = '/storage/' . $path;
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'Profile updated', 'user' => $user]);
+    }
+
+    public function me(Request $request)
+    {
+        $user = $request->user()->only(['id', 'name', 'email', 'bio', 'image']);
+
+        // Optionally include roles
+        $user['roles'] = $request->user()->roles->pluck('name');
+
+        return response()->json($user);
+    }
+
 }

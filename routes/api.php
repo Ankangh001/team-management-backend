@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\MessageController;
 
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Illuminate\Session\Middleware\StartSession;
@@ -38,8 +39,12 @@ Route::middleware([
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index']); // list + search
+    Route::get('/user', [UserController::class, 'me']);
+    Route::post('/user/update-profile', [UserController::class, 'updateProfile']);
     Route::post('/users/{id}/assign-role', [UserController::class, 'assignRole']); // assign role
     Route::post('/users/{user}/toggle-role', [UserController::class, 'toggleTeamViewer']);
+    Route::post('/messages', [MessageController::class, 'store']);
+    Route::get('/messages/inbox', [MessageController::class, 'inbox']);
 });
 
 Route::middleware(['auth:sanctum', 'role:super_admin'])->get('/admin/users', [AdminUserController::class, 'index']);
