@@ -32,11 +32,32 @@ class UserController extends Controller
         ]);
     }
 
+    public function getTeamMembers_old()
+    {
+        $users = User::whereHas('roles', function ($query) {
+            $query->where('name', 'team_viewer');
+        })->get(['id', 'name', 'email', 'image', 'role', 'bio']);
+
+        return response()->json($users);
+    }
+
     public function getTeamMembers()
     {
         $users = User::whereHas('roles', function ($query) {
             $query->where('name', 'team_viewer');
         })->get(['id', 'name', 'email', 'image', 'role', 'bio']);
+
+        // Map image to full direct-image URL
+        $users->transform(function ($user) {
+            if ($user->image) {
+                // Extract filename only
+                $filename = basename($user->image); // e.g., FG5wLIncrezVBVCLb8DM7NWRF9ua8sy5KxE9P3u1.webp
+                $user->image_url = url('/direct-image/' . $filename);
+            } else {
+                $user->image_url = null; // or a default URL
+            }
+            return $user;
+        });
 
         return response()->json($users);
     }
