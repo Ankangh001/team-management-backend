@@ -57,3 +57,6 @@ Route::get('/stats', [PostController::class, 'stats']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/team-members', [UserController::class, 'getTeamMembers']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
+
+// Admin-only: Reply to a comment (one-time)
+Route::middleware(['auth:sanctum', 'role:super_admin'])->post('/comments/{id}/reply', [CommentController::class, 'reply']);

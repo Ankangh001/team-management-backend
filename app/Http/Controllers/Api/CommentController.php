@@ -16,7 +16,7 @@ class CommentController extends Controller
         return Comment::where('post_id', $id)->orderBy('created_at')->get();
     }
 
-    public function store(Request $request, $id)
+    public function store_old(Request $request, $id)
     {
         $request->validate([
             'content' => 'required|string',
@@ -24,6 +24,7 @@ class CommentController extends Controller
 
         $user = auth()->user();
 
+        dd($request->all());
         $comment = new Comment();
         $comment->post_id = $id;
         $comment->content = $request->content;
@@ -33,6 +34,39 @@ class CommentController extends Controller
         $comment->save();
 
         return response()->json($comment, 201);
+    }
+
+
+    public function store(Request $request, $postId)
+    {
+        $request->validate([
+            'content' => 'required|string',
+            'author' => 'nullable|string', // optional if user is logged in
+        ]);
+
+        $user = auth()->user();
+        $author = $user ? $user->name : $request->author;
+
+        if (!$author) {
+            return response()->json(['message' => 'Author name required'], 422);
+        }
+
+        // Optional: prevent one comment per user logic
+        $existing = \App\Models\Comment::where('post_id', $postId)
+            ->where('author', $author)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['message' => 'You already commented on this post'], 400);
+        }
+
+        $comment = \App\Models\Comment::create([
+            'post_id' => $postId,
+            'author' => $author,
+            'content' => $request->content,
+        ]);
+
+        return response()->json($comment);
     }
 
 

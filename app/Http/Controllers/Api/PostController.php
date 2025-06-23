@@ -8,13 +8,30 @@ use App\Models\Post;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index_old()
     {
         return Post::select('id', 'title', 'content', 'post_type', 'is_pinned', 'author', 'image', 'created_at')
         ->orderByDesc('is_pinned')
         ->orderByDesc('created_at')
         ->get();
     }
+
+
+    public function index()
+    {
+        $posts = Post::select('id', 'title', 'content', 'post_type', 'is_pinned', 'author', 'image', 'created_at', 'likes')
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->get();
+
+        // You need to include who liked which post. For now, simulate it:
+        foreach ($posts as $post) {
+            $post->liked_by = $post->liked_by ?? []; // Or fetch real liked users if stored
+        }
+
+        return $posts;
+    }
+
 
     public function store(Request $request)
     {
@@ -84,10 +101,34 @@ class PostController extends Controller
         return response()->json(['message' => 'Post deleted']);
     }
 
-    public function like($id)
+    public function like(Request $request, $id)
     {
+        $user = auth()->user();
+        $author = $user ? $user->name : $request->input('author');
+
+        if (!$author) {
+            return response()->json(['message' => 'Author name required'], 422);
+        }
+
+        // Check if this user already liked the post
+        $existing = \App\Models\Like::where('post_id', $id)
+            ->where('author', $author)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['message' => 'You already liked this post'], 400);
+        }
+
+        // Optional: you can also store likes in a separate table for tracking
+        \App\Models\Like::create([
+            'post_id' => $id,
+            'author' => $author,
+        ]);
+
+        // Increment the post's like count
         $post = Post::findOrFail($id);
         $post->increment('likes');
+
         return response()->json(['success' => true]);
     }
 
