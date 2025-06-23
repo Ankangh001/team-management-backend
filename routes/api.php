@@ -56,3 +56,4 @@ Route::get('/posts/{id}/comments', [CommentController::class, 'index']);
 Route::get('/stats', [PostController::class, 'stats']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/team-members', [UserController::class, 'getTeamMembers']);
+Route::get('/posts/{id}', [PostController::class, 'show']);
