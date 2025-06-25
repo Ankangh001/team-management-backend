@@ -50,7 +50,6 @@ class UserController extends Controller
         // Map image to full direct-image URL
         $users->transform(function ($user) {
             if ($user->image) {
-                // Extract filename only
                 $filename = basename($user->image); // e.g., FG5wLIncrezVBVCLb8DM7NWRF9ua8sy5KxE9P3u1.webp
                 $user->image_url = url('/direct-image/' . $filename);
             } else {
@@ -82,6 +81,13 @@ class UserController extends Controller
         }
 
         $user->save();
+
+        if ($user->image) {
+            $filename = basename($user->image); // e.g., FG5wLIncrezVBVCLb8DM7NWRF9ua8sy5KxE9P3u1.webp
+            $user->image = url('/direct-image/' . $filename);
+        } else {
+            $user->image = null; // or a default URL
+        }
 
         return response()->json(['message' => 'Profile updated', 'user' => $user]);
     }
