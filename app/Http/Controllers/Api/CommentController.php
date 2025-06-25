@@ -69,5 +69,22 @@ class CommentController extends Controller
         return response()->json($comment);
     }
 
+    public function reply(Request $request, $commentId)
+    {
+        $request->validate([
+            'reply' => 'required|string|max:1000',
+        ]);
+
+        $comment = Comment::findOrFail($commentId);
+
+        if ($comment->reply) {
+            return response()->json(['message' => 'Reply already exists'], 400);
+        }
+
+        $comment->reply = $request->reply;
+        $comment->save();
+
+        return response()->json(['message' => 'Reply saved successfully']);
+    }
 
 }

@@ -20,6 +20,13 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if ($user['image']) {
+            $filename = basename($user['image']);
+            $user['image'] = url('/direct-image/' . $filename);
+        } else {
+            $user['image'] = null;
+        }
+
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.']

@@ -14,3 +14,14 @@ Route::get('/direct-image/{filename}', function ($filename) {
 
     return Response::file($path);
 });
+
+
+Route::get('/direct-post-image/{filename}', function ($filename) {
+    $path = storage_path('app/public/posts/' . $filename);
+
+    if (!file_exists($path)) {
+        abort(404, 'File not found.');
+    }
+
+    return Response::file($path);
+});

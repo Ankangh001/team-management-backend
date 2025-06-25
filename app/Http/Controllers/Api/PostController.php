@@ -8,14 +8,6 @@ use App\Models\Post;
 
 class PostController extends Controller
 {
-    public function index_old()
-    {
-        return Post::select('id', 'title', 'content', 'post_type', 'is_pinned', 'author', 'image', 'created_at')
-        ->orderByDesc('is_pinned')
-        ->orderByDesc('created_at')
-        ->get();
-    }
-
 
     public function index()
     {
@@ -24,12 +16,19 @@ class PostController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        // You need to include who liked which post. For now, simulate it:
         foreach ($posts as $post) {
-            $post->liked_by = $post->liked_by ?? []; // Or fetch real liked users if stored
+            $post->liked_by = $post->liked_by ?? [];
+
+            // Add full image URL if image exists
+            if ($post->image) {
+                $filename = basename($post->image);
+                $post->image = url('/direct-post-image/' . $filename);
+            } else {
+                $post->image = null;
+            }
         }
 
-        return $posts;
+        return response()->json($posts);
     }
 
 
@@ -80,15 +79,27 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
-        $data = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'post_type' => 'required|in:blog,event',
-            'author' => 'nullable|string',
-            'is_pinned' => 'boolean',
+            'post_type' => 'required|string|in:blog,event,news',
+            'author' => 'required|string|max:255',
+            'is_pinned' => 'nullable|boolean',
+            'image' => 'nullable|image',
         ]);
 
-        $post->update($data);
+        $post->title = $request->title;
+        $post->content = $request->content;
+        $post->post_type = $request->post_type;
+        $post->author = $request->author;
+        $post->is_pinned = $request->is_pinned ?? false;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('posts', 'public');
+            $post->image = 'storage/' . $path;
+        }
+
+        $post->save();
 
         return response()->json($post);
     }
@@ -136,6 +147,13 @@ class PostController extends Controller
     {
         $post = Post::with('comments')->findOrFail($id);
 
+        if ($post->image) {
+            $filename = basename($post->image);
+            $post->image = url('/direct-post-image/' . $filename);
+        } else {
+            $post->image = null;
+        }
+        
         return response()->json($post);
     }
 

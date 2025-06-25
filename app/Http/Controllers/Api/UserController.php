@@ -93,6 +93,12 @@ class UserController extends Controller
         // Optionally include roles
         $user['roles'] = $request->user()->roles->pluck('name');
 
+        if ($user['image']) {
+            $filename = basename($user['image']);
+            $user['image'] = url('/direct-image/' . $filename);
+        } else {
+            $user['image'] = null;
+        }
         return response()->json($user);
     }
 
