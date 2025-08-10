@@ -27,5 +27,16 @@ class SuperAdminSeeder extends Seeder
         );
 
         $user->assignRole('super_admin');
+
+
+        // Second super admin
+        $user2 = User::firstOrCreate(
+            ['email' => 'pai@esamudaay.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('IntraNest2025$')
+            ]
+        );
+        $user2->assignRole('super_admin');
     }
 }
