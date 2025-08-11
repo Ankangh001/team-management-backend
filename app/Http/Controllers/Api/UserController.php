@@ -96,6 +96,9 @@ class UserController extends Controller
 
         $user->save();
 
+        // Load roles for the response
+        $user->load('roles');
+
         if ($user->image) {
             $filename = basename($user->image); // e.g., FG5wLIncrezVBVCLb8DM7NWRF9ua8sy5KxE9P3u1.webp
             $user->image = url('/direct-image/' . $filename);
@@ -108,18 +111,20 @@ class UserController extends Controller
 
     public function me(Request $request)
     {
-        $user = $request->user()->only(['id', 'name', 'email', 'bio', 'image']);
+        $user = $request->user();
+        
+        // Get user data with roles
+        $userData = $user->only(['id', 'name', 'email', 'bio', 'image']);
+        $userData['roles'] = $user->roles;
 
-        // Optionally include roles
-        $user['roles'] = $request->user()->roles->pluck('name');
-
-        if ($user['image']) {
-            $filename = basename($user['image']);
-            $user['image'] = url('/direct-image/' . $filename);
+        if ($userData['image']) {
+            $filename = basename($userData['image']);
+            $userData['image'] = url('/direct-image/' . $filename);
         } else {
-            $user['image'] = null;
+            $userData['image'] = null;
         }
-        return response()->json($user);
+        
+        return response()->json($userData);
     }
 
 }
