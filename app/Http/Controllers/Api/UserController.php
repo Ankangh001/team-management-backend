@@ -11,7 +11,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
-        $users = User::with('roles')
+        $users = User::with(['roles', 'permissions'])
             ->when($search, fn($q) => $q->where('email', 'like', "%$search%"))
             ->get();
 
@@ -28,6 +28,20 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Role updated',
+            'roles' => $user->roles
+        ]);
+    }
+
+    public function toggleEditorRole(User $user)
+    {
+        if ($user->hasRole('team_editor')) {
+            $user->removeRole('team_editor');
+        } else {
+            $user->assignRole('team_editor');
+        }
+
+        return response()->json([
+            'message' => 'Editor role updated',
             'roles' => $user->roles
         ]);
     }

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -20,17 +19,17 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.']
+            ]);
+        }
+
         if ($user['image']) {
             $filename = basename($user['image']);
             $user['image'] = url('/direct-image/' . $filename);
         } else {
             $user['image'] = null;
-        }
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.']
-            ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
