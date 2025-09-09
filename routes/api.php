@@ -21,6 +21,11 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 | is assigned the "api" middleware group. Enjoy building your API!
 |*/ 
 
+
+// Waitlist API (static token auth, no full auth required)
+Route::get('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'index']);
+Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store']);
+
 Route::middleware([
     EnsureFrontendRequestsAreStateful::class,
     EncryptCookies::class,
