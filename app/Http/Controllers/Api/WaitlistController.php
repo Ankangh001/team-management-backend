@@ -12,7 +12,14 @@ class WaitlistController extends Controller
     // Static token for simple authentication (from .env)
     private function checkToken(Request $request)
     {
-        $token = $request->header('X-API-TOKEN');
+        // Check both Authorization and X-API-TOKEN headers for flexibility
+        $token = $request->header('Authorization');
+        if ($token && str_starts_with($token, 'Bearer ')) {
+            $token = substr($token, 7); // Remove 'Bearer ' prefix
+        } else {
+            $token = $request->header('X-API-TOKEN');
+        }
+        
         $staticToken = env('WAITLIST_API_TOKEN', 'STATIC_WAITLIST_TOKEN');
         if ($token !== $staticToken) {
             return response()->json(['error' => 'Unauthorized'], 401);
