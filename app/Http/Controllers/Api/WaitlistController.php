@@ -51,4 +51,17 @@ class WaitlistController extends Controller
         $waitlist = Waitlist::create($data);
         return response()->json($waitlist, 201);
     }
+
+    public function destroy(Request $request, $id)
+    {
+        if ($resp = $this->checkToken($request)) return $resp;
+        
+        $waitlist = Waitlist::find($id);
+        if (!$waitlist) {
+            return response()->json(['error' => 'Waitlist entry not found'], 404);
+        }
+        
+        $waitlist->delete();
+        return response()->json(['message' => 'Waitlist entry deleted successfully'], 200);
+    }
 }
